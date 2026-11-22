@@ -1,0 +1,45 @@
+name: Build MyCustomCC (rootless)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    env:
+      THEOS: ${{ github.workspace }}/theos-root
+    steps:
+      - name: Checkout tweak
+        uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          brew install ldid dpkg make xz
+          echo "$(brew --prefix make)/libexec/gnubin" >> "$GITHUB_PATH"
+
+      - name: Clone theos/theos
+        run: |
+          git clone --recursive --depth 1 https://github.com/theos/theos.git "$THEOS"
+
+      - name: Fetch iPhoneOS SDK
+        run: |
+          cd "$THEOS"
+          rm -rf sdks
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/theos/sdks.git sdks
+          cd sdks
+          git sparse-checkout set --no-cone '/iPhoneOS16.*.sdk/'
+          ls
+
+      - name: Build rootless .deb
+        run: |
+          make clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
+
+      - name: Upload .deb
+        uses: actions/upload-artifact@v4
+        with:
+          name: MyCustomCC-rootless-deb
+          path: packages/*.deb
+          if-no-files-found: error
