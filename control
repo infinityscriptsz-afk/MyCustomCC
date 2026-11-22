@@ -1,0 +1,9 @@
+Package: com.karlo.mycustomcc
+Name: MyCustomCC
+Version: 1.0.0
+Architecture: iphoneos-arm64
+Description: Dark liquid-glass Control Center for iPhone 6s that fits on one screen.
+Maintainer: Karlo
+Author: Karlo
+Section: Tweaks
+Depends: mobilesubstrate (>= 0.9.5000), firmware (>= 15.0)
